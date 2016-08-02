@@ -4,6 +4,13 @@ angular.module("myapp", []).controller("HelloController", function($scope) {
   $scope.json.parsedJson = '{}';
 
   $scope.update = function(json) {
+    json.working = true;
+    clearTimeout($scope.sweatingTimeout);
+    $scope.sweatingTimeout = setTimeout(function() {
+      $scope.$apply(function () {
+        $scope.json.working = false;
+      });
+    }.bind(this), 500);
     try {
       var startingPosition = json.sourceText.length;
       var startingMatch;
