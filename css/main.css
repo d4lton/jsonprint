@@ -21,7 +21,7 @@ h2 {
 
 .box {
   width: 100%;
-  min-height: 200px;
+  min-height: 400px;
   background-color: lightgray;
   white-space: pre-wrap;
   word-break: break-all;

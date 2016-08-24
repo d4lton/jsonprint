@@ -1,27 +1,52 @@
 angular.module("myapp", []).controller("HelloController", function($scope) {
 
   $scope.json = {};
-  $scope.json.parsedJson = '{}';
+  $scope.json.parsedJson = '';
 
-  $scope.extractJsonText = function(text, removeSlashes) {
-    text = text.split('\n').join(' ');
-    var startingMatch, startingPosition = text.length;
-    ['{(.+)}', '\\[(.+)\\]'].forEach(function(expression) {
-      var matches = text.match(expression);
-      if (matches) {
-        if (matches.index < startingPosition) {
-          startingPosition = matches.index;
-          startingMatch = matches
-        }
+  $scope.extractJsonObjects = function(text) {
+    var results = [];
+    var braceCount = 0;
+    var candidate = '';
+    text.split('').forEach(function(character) {
+      switch (character) {
+        case '{':
+          if (braceCount == 0) {
+            results.push(candidate);
+            candidate = '';
+          }
+          braceCount++;
+          candidate += character;
+          break;
+        case '}':
+          braceCount--;
+          candidate += character;
+          if (braceCount == 0) {
+            candidate = candidate.split('\\"').join('"');
+            try {
+              candidate = JSON.stringify(JSON.parse(candidate), function(key, value) {
+                if (typeof value === 'string') {
+                  value = decodeURIComponent(value);
+                  var objects = this.extractJsonObjects(value);
+                  if (objects.length > 0) {
+                    return objects;
+                  }
+                }
+                return value;
+              }.bind(this), 3);
+
+              results.push(JSON.parse(candidate));
+            } catch(exception) {
+              console.log(exception);
+            }
+            candidate = '';
+          }
+          break;
+        default:
+          candidate += character;
+          break;
       }
-    });
-    if (startingMatch) {
-      text = startingMatch[0].split('\\"').join('"');
-      if (removeSlashes) {
-        text = text.split('\\').join('');
-      }
-    }
-    return text;
+    }.bind(this));
+    return results;
   };
 
   $scope.update = function(json) {
@@ -32,32 +57,19 @@ angular.module("myapp", []).controller("HelloController", function($scope) {
         $scope.json.working = false;
       });
     }.bind(this), 500);
-    try {
-      sourceText = this.extractJsonText(json.sourceText, true);
-      json.extractedJson = sourceText;
-      var subJsons = [];
-      var jsonString = JSON.stringify(JSON.parse(sourceText), function(key, value) {
-        if (typeof value === 'string') {
-          value = decodeURIComponent(value);
-          var jsonText = this.extractJsonText(value);
-          if (value != jsonText) {
-            subJsons.push(jsonText);
-            value = value.replace(jsonText, '%JSON_' + subJsons.length + '%');
-          }
-        }
-        return value;
-      }.bind(this), 3);
-      if (subJsons.length > 0) {
-        console.log(jsonString);
-        subJsons.forEach(function(subJson, index) {
-          console.log(subJson);
-          jsonString = jsonString.replace('%JSON_' + (index + 1) + '%', JSON.stringify(JSON.parse(subJson), null, 3));
-        }.bind(this));
+
+    var objects = this.extractJsonObjects(json.sourceText);
+    json.parsedJson = '';
+
+console.log(objects);
+
+    objects.forEach(function(object) {
+      if (typeof object === 'string') {
+        json.parsedJson += object;
+      } else {
+        json.parsedJson += JSON.stringify(object, null, 3);
       }
-      json.parsedJson = jsonString;
-    } catch (exception) {
-      json.parsedJson = exception.message;
-    }
+    }.bind(this));
   };
 
 });
