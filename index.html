@@ -48,7 +48,7 @@
     <div ng-controller="HelloController">
       <h1>JSON PRINT: a JSON validator, extractor, and pretty-printer!</h1>
       <h2>1. in goes the ugly JSON:</h2>
-      <textarea placeholder='Paste JSON here...' class='box' ng-model='json.sourceText' ng-change='update(json)'></textarea>
+      <textarea autofocus placeholder='Paste JSON here...' class='box' ng-model='json.sourceText' ng-change='update(json)'></textarea>
       <h2>2. out comes the pretty JSON:</h2>
       <textarea disabled class='box'>{{json.parsedJson}}</textarea>
       <div class='spinner' ng-class="{'ball1':json.working}" id='spinner'></div>
