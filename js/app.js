@@ -6,7 +6,8 @@ angular.module("JsonPrintApp", ['ngRoute'])
     $scope.json.showSurroundingText = false;
     $scope.json.parsedJson = '';
   
-    $scope.extractJsonObjects = function(text) {
+    $scope.extractJsonObjects = function(text, depth) {
+      depth = (typeof depth === 'undefined') ? 0 : depth;
       var results = [];
       var braceCount = 0;
       var candidate = '';
@@ -30,7 +31,7 @@ angular.module("JsonPrintApp", ['ngRoute'])
                   candidate = JSON.stringify(JSON.parse(candidate), function(key, value) {
                     if (typeof value === 'string') {
                       value = decodeURIComponent(value);
-                      var objects = this.extractJsonObjects(value);
+                      var objects = this.extractJsonObjects(value, depth + 1);
                       if (objects.length > 0) {
                         return objects;
                       }
@@ -50,6 +51,9 @@ angular.module("JsonPrintApp", ['ngRoute'])
               break;
           }
         }.bind(this));
+      }
+      if (depth === 0 && candidate.length > 0) {
+        results.push(candidate);
       }
       return results;
     };
