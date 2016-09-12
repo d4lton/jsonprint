@@ -3,9 +3,20 @@ angular.module("JsonPrintApp", ['ngRoute'])
   .controller("JsonPrintController", function($scope) {
 
     $scope.json = {};
+
+    // include non-JSON text in parsed results?
     $scope.json.showSurroundingText = false;
+
+    // parsed results
     $scope.json.parsedJson = '';
-  
+ 
+    /**
+     * Given a string, attempt to find a JSON-like object. Called recursively to find any parsed string values
+     * that might also be JSON-like objects.
+     * @param {string} text The string to examine
+     * @param {number} depth The current recursion depth
+     * @returns {Array} An array of strings and/or objects found in the given text
+     */ 
     $scope.extractJsonObjects = function(text, depth) {
       depth = (typeof depth === 'undefined') ? 0 : depth;
       var results = [];
@@ -28,6 +39,8 @@ angular.module("JsonPrintApp", ['ngRoute'])
               if (braceCount == 0) {
                 candidate = candidate.split('\\"').join('"');
                 try {
+                  // attempt to parse the candidate JSON string as JSON, checking each parsed value
+                  // to see if it, too, is a JSON string
                   candidate = JSON.stringify(JSON.parse(candidate), function(key, value) {
                     if (typeof value === 'string') {
                       value = decodeURIComponent(value);
@@ -38,9 +51,9 @@ angular.module("JsonPrintApp", ['ngRoute'])
                     }
                     return value;
                   }.bind(this), 3);
-    
                   results.push(JSON.parse(candidate));
                 } catch(exception) {
+                  // TODO: maybe add the parse exception to the results in some way
                   console.log(exception);
                 }
                 candidate = '';
@@ -52,12 +65,19 @@ angular.module("JsonPrintApp", ['ngRoute'])
           }
         }.bind(this));
       }
+      // if this is the first entrance into this routine, add any remaining characters to the results as
+      // a string for potential display in the json results
       if (depth === 0 && candidate.length > 0) {
         results.push(candidate);
       }
       return results;
     };
-  
+ 
+    /**
+     * Called when the source text is changed. Attempts to extract JSON object(s) from the source text
+     * and update the parsed results.
+     * @param {object} json The app's json object
+     */ 
     $scope.update = function(json) {
       json.working = true;
       
@@ -68,7 +88,8 @@ angular.module("JsonPrintApp", ['ngRoute'])
           $scope.json.working = false;
         });
       }.bind(this), 500);
-  
+ 
+      // find any JSON objects and update the parsed results
       var objects = this.extractJsonObjects(json.sourceText);
       json.parsedJson = '';
       objects.forEach(function(object) {
