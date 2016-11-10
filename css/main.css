@@ -25,11 +25,25 @@ label {
 }
 
 .footer {
-  width: 50%;
-  text-align: center;
-  padding: 10px 0 0 0;
-  margin: auto;
+  display: table;
+  width: 100%;
+  padding: 10px 0 8px 0;
   color: gray;
+}
+
+.copyright {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  width: 100%;
+}
+
+.github {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: right;
+  padding: 0 8px 0 0;
+  width: 25%;
 }
 
 .box {
