@@ -9,6 +9,26 @@ angular.module("JsonPrintApp", ['ngRoute'])
 
     // parsed results
     $scope.json.parsedJson = '';
+
+    /**
+     * Parse a string into a JSON object. If the first attempt fails, try to convert escaped quotes
+     * to normal quotes and try again.
+     * @param {string} text The string to convert
+     * @returns {object}
+     */
+    $scope.parse = function(text) {
+      try {
+        return JSON.parse(text);
+      } catch (exception) {
+        console.log(exception);
+      }
+      text = text.split('\\"').join('"');
+      try {
+        return JSON.parse(text);
+      } catch (exception) {
+        console.log(exception);
+      }
+    };
  
     /**
      * Given a string, attempt to find a JSON-like object. Called recursively to find any parsed string values
@@ -37,11 +57,10 @@ angular.module("JsonPrintApp", ['ngRoute'])
               braceCount--;
               candidate += character;
               if (braceCount == 0) {
-                candidate = candidate.split('\\"').join('"');
                 try {
                   // attempt to parse the candidate JSON string as JSON, checking each parsed value
                   // to see if it, too, is a JSON string
-                  candidate = JSON.stringify(JSON.parse(candidate), function(key, value) {
+                  candidate = JSON.stringify(this.parse(candidate), function(key, value) {
                     if (typeof value === 'string') {
                       value = decodeURIComponent(value);
                       var objects = this.extractJsonObjects(value, depth + 1);
@@ -53,8 +72,15 @@ angular.module("JsonPrintApp", ['ngRoute'])
                   }.bind(this), 3);
                   results.push(JSON.parse(candidate));
                 } catch(exception) {
+                  // Unexpected token p in JSON at position 2872
+                  var matches = exception.message.match(/Unexpected token (.+?) in JSON at position (\d+)/);
+                  if (matches) {
+                    console.log('TOKEN', matches[1]);
+                    console.log('POSITION', matches[2]);
+                    console.log('CONTEXT', candidate.substring(matches[2]));
+                  }
                   // TODO: maybe add the parse exception to the results in some way
-                  console.log(exception);
+                  console.log(exception.message);
                 }
                 candidate = '';
               }
