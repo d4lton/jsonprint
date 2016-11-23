@@ -33,6 +33,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/clipboard.min.js"></script>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -49,13 +50,14 @@
     <div ng-controller="JsonPrintController">
       <h1>JSON PRINT: a JSON validator, extractor, and pretty-printer!</h1>
       <h2>1. in goes the ugly JSON:</h2>
-      <textarea autofocus placeholder='Paste JSON here...' class='box' ng-model='json.sourceText' ng-change='update(json)'></textarea>
-      <label>Show text: <input type='checkbox' ng-model='json.showSurroundingText' ng-change='update(json)'/></label>
+      <textarea autofocus placeholder="Paste JSON here..." class="box" ng-model="json.sourceText" ng-change="update(json)"></textarea>
+      <label>Show text: <input type="checkbox" ng-model="json.showSurroundingText" ng-change="update(json)"/></label>
       <h2>2. out comes the pretty JSON:</h2>
-      <textarea disabled class='box'>{{json.parsedJson}}</textarea>
-      <div class='spinner' ng-class="{'ball1':json.working}" id='spinner'></div>
+      <textarea id="parsedjson" readonly class="box">{{json.parsedJson}}</textarea>
+      <button class="copy-button" data-clipboard-target="#parsedjson">Copy to clipboard</button>
+      <div class="spinner" ng-class="{'ball1':json.working}" id="spinner"></div>
     </div>
-    <div class='footer'><span class='copyright'>Copyright &copy;2016 by Dana Basken</span><span class='github'><a href='https://github.com/d4lton/jsonprint'><img src="images/GitHub-Mark-Light-32px.png" /></a></span></div>
+    <div class="footer"><span class="copyright">Copyright &copy;2016 by Dana Basken</span><span class="github"><a href="https://github.com/d4lton/jsonprint"><img src="images/GitHub-Mark-Light-32px.png" /></a></span></div>
   </body>
 
 </html>

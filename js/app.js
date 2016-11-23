@@ -1,3 +1,8 @@
+/**
+ * jsonprint.com App
+ * Copyright ©2016 by Dana Basken
+ * https://github.com/d4lton/jsonprint
+ */
 angular.module("JsonPrintApp", ['ngRoute'])
 
   .controller("JsonPrintController", function($scope) {
@@ -9,6 +14,8 @@ angular.module("JsonPrintApp", ['ngRoute'])
 
     // parsed results
     $scope.json.parsedJson = '';
+
+    $scope.clippy = new Clipboard('.copy-button');
 
     /**
      * Parse a string into a JSON object. If the first attempt fails, try to convert escaped quotes
